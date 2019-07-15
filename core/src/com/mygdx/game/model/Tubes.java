@@ -19,35 +19,34 @@ public class Tubes {
     float  gap;
     float     x;
     Random rand;
-    float timer;
-    float delta_timer;
-    float spawn;
-    float max_spawn;
-    float min_spawn;
-    float min_gap;
+    float rand_h;
+    float dist;
 
     public Tubes() {
-        timer = 0;
-        delta_timer = 0;
-        min_spawn = 1f;
-        max_spawn = 2f;
-        min_gap = 3;
+
         x = GameInfo.SPEED;
         rand = new Random();
+
         top = new ArrayList<Sprite>();
         bottom = new ArrayList<Sprite>();
-        gap = (rand.nextFloat() * (GameInfo.HEIGHT / 3 - GameInfo.HEIGHT / min_gap)) + GameInfo.HEIGHT / min_gap;
-        spawn = (rand.nextFloat() * (max_spawn - min_spawn)) + min_spawn;
+
+        gap = GameInfo.HEIGHT / 5;
+
+        rand_h = (rand.nextFloat() * (GameInfo.HEIGHT / 2 - GameInfo.HEIGHT / 8)) + GameInfo.HEIGHT / 8;
+        rand_h = rand.nextInt() == 0 ? -rand_h : rand_h;
+
         top.add(new Sprite(new Texture("toptube.png")));
         bottom.add(new Sprite(new Texture("bottomtube.png")));
+        top.get(0).setPosition(GameInfo.WIDTH , GameInfo.HEIGHT + rand_h - GameInfo.TUBE_HEIGHT + gap / 2);
+        bottom.get(0).setPosition(GameInfo.WIDTH ,  -GameInfo.TUBE_HEIGHT + rand_h + gap);
 
-        top.get(0).setPosition(GameInfo.WIDTH , GameInfo.HEIGHT - GameInfo.TUBE_HEIGHT + gap / 2);
-        bottom.get(0).setPosition(GameInfo.WIDTH ,  -gap / 2);
+        dist = 0;
     }
 
     public void update(){
 
         x = GameInfo.SPEED;
+
         for (Sprite tube : top) {
             tube.setPosition(tube.getX() + x, tube.getY());
         }
@@ -56,29 +55,20 @@ public class Tubes {
             tube.setPosition(tube.getX() + x, tube.getY());
         }
 
-        if (delta_timer > 2) {
-            max_spawn -= max_spawn < 0.1f ? 0 : 0.05f;
-            min_spawn -= min_spawn < 0.1f ? 0 : 0.05f;
-            delta_timer = 0;
-        }
+        dist = top.get(top.size() - 1).getX() + GameInfo.TUBE_WIDTH + ((rand.nextFloat() * (600 - 200)) + 200);
+        if (dist < GameInfo.WIDTH) {
 
-        if (timer > spawn) {
-            gap = (rand.nextFloat() * (GameInfo.HEIGHT / 3 - GameInfo.HEIGHT / min_gap)) + GameInfo.HEIGHT / min_gap;
+            rand_h = (rand.nextFloat() * (GameInfo.HEIGHT / 3 - GameInfo.HEIGHT / 5)) + GameInfo.HEIGHT / 5;
+            rand_h = rand.nextInt() == 0 ? -rand_h : rand_h;
 
             top.add(new Sprite(new Texture("toptube.png")));
             bottom.add(new Sprite(new Texture("bottomtube.png")));
-            top.get(top.size() - 1).setPosition(GameInfo.WIDTH , GameInfo.HEIGHT - GameInfo.TUBE_HEIGHT + gap / 2);
-            bottom.get(top.size() - 1).setPosition(GameInfo.WIDTH ,  -gap / 2);
-
-            spawn = (rand.nextFloat() * (max_spawn - min_spawn)) + min_spawn;;
-            timer = 0;
-            min_gap += min_gap > 6 ? 0 : 0.4f;
+            top.get(top.size() - 1).setPosition(GameInfo.WIDTH , GameInfo.HEIGHT + rand_h - GameInfo.TUBE_HEIGHT + gap / 2);
+            bottom.get(top.size() - 1).setPosition(GameInfo.WIDTH ,  -GameInfo.TUBE_HEIGHT + rand_h + gap);
         }
 
-        timer += Gdx.graphics.getDeltaTime();
-        delta_timer += Gdx.graphics.getDeltaTime();
-
         if (top.get(0).getX() + GameInfo.TUBE_WIDTH < 0) {
+
             top.remove(0);
             bottom.remove(0);
         }

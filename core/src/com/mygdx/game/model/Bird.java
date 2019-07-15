@@ -2,9 +2,6 @@ package com.mygdx.game.model;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.controller.GameMain;
@@ -15,44 +12,54 @@ import java.util.Timer;
 
 public class Bird {
 
-    Sprite bird;
-    int i;
+    float x;
+    float y;
+    float i;
     float timer;
-    Texture atlas;
-    TextureRegion [][] animation;
+    BirdAnimation animation;
+    TextureRegion currentTexture;
 
     public Bird() {
-        atlas = new Texture("birdanimation.png");
-        animation = TextureRegion.split(atlas, atlas.getWidth() / 3, atlas.getHeight());
-        timer = 0;
-        bird = new Sprite(animation[0][0]);
-        bird.setPosition((GameInfo.WIDTH / 4) - bird.getWidth() / 4,
-                (GameInfo.HEIGHT / 2) - bird.getHeight() / 2);
+        animation = new BirdAnimation();
+        currentTexture = animation.getCurrentTexture();
+        x = (GameInfo.WIDTH / 4) - currentTexture.getRegionWidth() / 4;
+        y = (GameInfo.HEIGHT / 2) - currentTexture.getRegionHeight() / 2;
+
         i = 0;
+        timer = 0;
     }
 
     public void update() {
 
-        if (Gdx.input.isTouched() && timer > 0.3f) {
+        animation.update();
+        currentTexture = animation.getCurrentTexture();
+
+        if (Gdx.input.isTouched() && timer > 0.2f) {
             timer = 0;
             i = 20;
-        }else
-            i--;
-        if (bird.getY() > GameInfo.HEIGHT )
-            i = -3;
-       else if (bird.getY() + i < GameInfo.HEIGHT *  0.15f)
-            GameMain.stop = true;
+            GameInfo.jump.stop();
+            GameInfo.jump.play();
+        } else
+            i -= 1.5f;
+        if (y > GameInfo.HEIGHT )
+            GameMain.state = "stop";
+       else if (y + i < GameInfo.HEIGHT *  0.15f)
+            GameMain.state = "stop";
 
-        bird.setPosition(bird.getX(), bird.getY() + i);
+        y += i;
         timer += Gdx.graphics.getDeltaTime();
     }
 
-    public Sprite getBird() {
-        return bird;
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
     }
 
     public void render(SpriteBatch batch) {
-        batch.draw(bird, bird.getX(), bird.getY(), GameInfo.BIRD_WIDTH, GameInfo.BIRD_HEIGHT);
+        batch.draw(currentTexture, x, y, GameInfo.BIRD_WIDTH, GameInfo.BIRD_HEIGHT);
 
     }
 }

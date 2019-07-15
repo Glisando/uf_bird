@@ -20,27 +20,39 @@ public class GameMain extends Game {
 
     Background bg1;
     Background bg2;
-    Texture     GameOver;
-    public static boolean stop = false;
+    public static String state = "start";
     Ground ground;
     GameController gameController;
-
+    GameOverController gameOverController;
+    StartController startController;
 
     @Override
     public void create() {
-        GameOver = new Texture("gameover.png");
+        startController = new StartController();
         batch = new SpriteBatch();
         bg1 = new Background(0);
         bg2 = new Background((int) GameInfo.WIDTH);
         ground = new Ground(0);
         gameController = new GameController();
+        GameInfo.music.setLooping(true);
+        GameInfo.music.play();
     }
 
     public void update() {
         bg1.update();
         bg2.update();
         ground.update();
-        gameController.update();
+
+        if (state == "new_game")
+            newGame();
+
+        if (state == "game")
+            gameController.update();
+        else if (state == "game_over") {
+            gameOverController.update();
+        } else if (state == "start") {
+            startController.update();
+        }
     }
     @Override
     public void render() {
@@ -48,17 +60,26 @@ public class GameMain extends Game {
         Gdx.gl.glClearColor(1, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        if (stop)
-            newGame();
+        if (state == "stop") {
+            gameOverController = new GameOverController(gameController.getScore());
+            GameInfo.explosion.play();
+            state = "game_over";
+        }
+
         update();
 
         batch.begin();
 
         bg1.render(batch);
         bg2.render(batch);
-        gameController.render(batch);
+        if (state == "game")
+            gameController.render(batch);
+        else if (state == "start")
+            startController.render(batch);
+        else if (state == "game_over")
+            gameOverController.render(batch);
+
         ground.render(batch);
-//        batch.draw(GameOver, 400, 800, 400, 400;
 
         batch.end();
     }
@@ -66,7 +87,7 @@ public class GameMain extends Game {
     public void newGame()
     {
         GameInfo.SPEED = -3;
-        stop = !stop;
+        state = "game";
         gameController = new GameController();
     }
     @Override
